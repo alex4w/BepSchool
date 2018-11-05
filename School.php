@@ -44,27 +44,34 @@ class Meta
 	public static function getUserByCorreo($Correo)
     {
         // Consulta de la meta
-         $consulta = "SELECT 	id, 
-						NAME, 
-						email, 
-						PASSWORD, 
-						create_time, 
-						gender, 
-						direccion, 
-						celular, 
-						id_Estado, 
-						id_UnidadEducativa, 
-						id_Provider, 
-						remember_token, 
-						username, 
-						representante, 
-						Url_Foto, 
-						imagen, 
-						ruta_imagen, 
-						provider 
-						FROM 
-						beptechn_school.users 
-						WHERE email=?";
+         $consulta = "SELECT 	u.id, 
+					u.name, 
+					u.email, 
+					u.password, 
+					u.create_time, 
+					u.gender, 
+					u.direccion, 
+					u.celular, 
+					u.id_Estado, 
+					u.id_UnidadEducativa, 
+					u.id_Provider, 
+					u.remember_token, 
+					u.username, 
+					u.representante, 
+					u.Url_Foto, 
+					u.imagen, 
+					u.ruta_imagen, 
+					u.provider,
+					e.nombre AS unidadEducativa,
+					ru.id_Roles,
+					r.`nombre` AS rol	 
+					FROM 
+					users u,unidadeseducativas e,`rolusers` ru,`roles` r 
+					WHERE u.id_UnidadEducativa=e.id 
+					AND u.id=ru.`id_User` 
+					AND ru.`id_Roles`=r.`id` 
+					AND u.email=? 
+					AND (ru.id_Roles=2 or ru.id_Roles=3)";
 
         try {
             // Preparar sentencia
@@ -85,27 +92,34 @@ class Meta
 	public static function getPerfilById($Id)
     {
         // Consulta de la meta
-        $consulta = "SELECT 	id, 
-						NAME, 
-						email, 
-						PASSWORD, 
-						create_time, 
-						gender, 
-						direccion, 
-						celular, 
-						id_Estado, 
-						id_UnidadEducativa, 
-						id_Provider, 
-						remember_token, 
-						username, 
-						representante, 
-						Url_Foto, 
-						imagen, 
-						ruta_imagen, 
-						provider 
-						FROM 
-						beptechn_school.users 
-						WHERE id=?";
+        $consulta = "SELECT 	u.id, 
+					u.name, 
+					u.email, 
+					u.password, 
+					u.create_time, 
+					u.gender, 
+					u.direccion, 
+					u.celular, 
+					u.id_Estado, 
+					u.id_UnidadEducativa, 
+					u.id_Provider, 
+					u.remember_token, 
+					u.username, 
+					u.representante, 
+					u.Url_Foto, 
+					u.imagen, 
+					u.ruta_imagen, 
+					u.provider,
+					e.nombre AS unidadEducativa,
+					r.`nombre` AS rol,
+					ru.id_Roles 					
+					FROM 
+					users u,unidadeseducativas e,`rolusers` ru,`roles` r 
+					WHERE u.id_UnidadEducativa=e.id 
+					AND u.id=ru.`id_User` 
+					AND ru.`id_Roles`=r.`id` 
+					AND u.id=? 
+					AND (ru.id_Roles=2 or ru.id_Roles=3)";
 
         try {
             // Preparar sentencia
