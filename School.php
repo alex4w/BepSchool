@@ -47,21 +47,18 @@ class Meta
          $consulta = "SELECT 	u.id, 
 					u.name, 
 					u.email, 
-					u.password, 
-					u.create_time, 
 					u.gender, 
 					u.direccion, 
 					u.celular, 
 					u.id_Estado, 
 					u.id_UnidadEducativa, 
-					u.id_Provider, 
 					u.remember_token, 
 					u.username, 
+					u.cedula, 
 					u.representante, 
 					u.Url_Foto, 
 					u.imagen, 
 					u.ruta_imagen, 
-					u.provider,
 					e.nombre AS unidadEducativa,
 					ru.id_Roles,
 					r.`nombre` AS rol	 
@@ -70,14 +67,14 @@ class Meta
 					WHERE u.id_UnidadEducativa=e.id 
 					AND u.id=ru.`id_User` 
 					AND ru.`id_Roles`=r.`id` 
-					AND u.email=? 
+					AND (u.email=? or u.username=?)
 					AND (ru.id_Roles=2 or ru.id_Roles=3)";
 
         try {
             // Preparar sentencia
             $comando = Database::getInstance()->getDb()->prepare($consulta);
             // Ejecutar sentencia preparada
-            $comando->execute(array($Correo));
+            $comando->execute(array($Correo,$Correo));
             // Capturar primera fila del resultado
             $row = $comando->fetch(PDO::FETCH_ASSOC);
             return $row;
@@ -95,24 +92,21 @@ class Meta
         $consulta = "SELECT 	u.id, 
 					u.name, 
 					u.email, 
-					u.password, 
-					u.create_time, 
 					u.gender, 
 					u.direccion, 
 					u.celular, 
 					u.id_Estado, 
 					u.id_UnidadEducativa, 
-					u.id_Provider, 
 					u.remember_token, 
 					u.username, 
+					u.cedula, 
 					u.representante, 
 					u.Url_Foto, 
 					u.imagen, 
 					u.ruta_imagen, 
-					u.provider,
 					e.nombre AS unidadEducativa,
-					r.`nombre` AS rol,
-					ru.id_Roles 					
+					ru.id_Roles,
+					r.`nombre` AS rol				
 					FROM 
 					users u,unidadeseducativas e,`rolusers` ru,`roles` r 
 					WHERE u.id_UnidadEducativa=e.id 
