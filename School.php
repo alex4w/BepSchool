@@ -131,6 +131,51 @@ class Meta
         }
     }
 	
+	public static function getAsignaturasById($Id)
+    {
+        // Consulta de la meta
+        $consulta = "SELECT 	a.id, 
+							a.nombre, 
+							p.nombre AS paralelo,
+							n.nombre AS nivel,
+							e.nombre AS especialidad,
+							ue.nombre AS unidadEducativa,
+							u.`name`,
+							u.`username`,
+							u.`cedula`,
+							pa.nombre AS periodoAcademico 
+							FROM 
+							asignaturas a,`paralelos` p,`niveles` n,`registroasignaturaestudiantes` re,
+							`users` u,`periodosacademicos` pa ,`especialidades` e,`unidadeseducativas` ue 
+							WHERE a.id_Paralelo=p.id 
+							AND p.id_nivel=n.id 
+							AND re.`id_Paralelo`=p.id 
+							AND re.`id_Estudiante`=u.id 
+							AND re.`id_Periodo`=pa.id 
+							AND pa.id_Estado=1 
+							AND u.id_Estado=1 
+							AND a.id_Especialidad= e.id 
+							AND u.id_unidadEducativa= ue.id 
+							AND u.id=? 
+							ORDER BY a.nombre ";
+
+        try {
+            // Preparar sentencia
+            $comando = Database::getInstance()->getDb()->prepare($consulta);
+            // Ejecutar sentencia preparada
+            $comando->execute(array($Id));
+            // Capturar primera fila del resultado
+            $row = $comando->fetchAll(PDO::FETCH_ASSOC);
+			
+            return $row;
+
+        } catch (PDOException $e) {
+            // Aquí puedes clasificar el error dependiendo de la excepción
+            // para presentarlo en la respuesta Json
+            return false;
+        }
+    }
+	
 	public static function getFotoById($Id)
     {
         // Consulta de la meta
