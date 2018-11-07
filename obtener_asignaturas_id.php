@@ -10,14 +10,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 	$id = $_GET['id'];
 	
     // Manejar petición GET
-    $perfil = Meta::getAsignaturasById($id);
-	
+    //$perfil = Meta::getAsignaturasById($id);
+	$profesor = Meta::getProfesoresAsignaturasById($id);
 	
 
-    if ($perfil) {
+    if ($profesor) {
 		$datos["estado"] = 1;
-		$datos["asignaturas"] = $perfil;
-		$profesor = Meta::getProfesoresAsignaturasById($id);
+		//$datos["asignaturas"] = $perfil;
 		$datos["profesores"] = $profesor;
 
         print json_encode($datos);

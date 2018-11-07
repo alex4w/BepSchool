@@ -188,7 +188,8 @@ class Meta
 							asignaturas a,registroasignaturadocentes rd,users u 
 							WHERE rd.id_Docente=u.id 
 							AND rd.id_Asignatura=a.id 
-							AND a.id_Paralelo=(SELECT id_Paralelo FROM `registroasignaturaestudiantes` WHERE id_Estudiante=?) 
+							AND a.id_Paralelo=(SELECT id_Paralelo FROM `registroasignaturaestudiantes` WHERE id_Estudiante=3) 
+							AND rd.`id_Periodo`=(SELECT id FROM `periodosacademicos` WHERE id_Estado=1)
 							ORDER BY a.nombre ";
 
         try {
