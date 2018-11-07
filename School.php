@@ -183,28 +183,13 @@ class Meta
 							a.nombre, 
 							u.name AS Profesor,
 							u.username,
-							u.cedula,
-							p.nombre AS paralelo 
-							FROM  
-							asignaturas a,registroasignaturadocentes rd,users u,`paralelos` p 
-							WHERE rd.id_Docente=u.id 
-							AND a.id_Paralelo=p.id 
-							AND a.id IN (SELECT 	a.id 
+							u.cedula 	
 							FROM 
-							asignaturas a,paralelos p,niveles n,registroasignaturaestudiantes re,
-							users u,periodosacademicos pa ,especialidades e,unidadeseducativas ue  
-							WHERE a.id_Paralelo=p.id 
-							AND p.id_nivel=n.id 
-							AND re.id_Paralelo=p.id 
-							AND re.id_Estudiante=u.id 
-							AND re.id_Periodo=pa.id 
-							AND pa.id_Estado=1 
-							AND u.id_Estado=1 
-							AND a.id_Especialidad= e.id 
-							AND u.id_unidadEducativa= ue.id 
-							AND u.id=? 
-							ORDER BY a.nombre )
-							ORDER BY a.nombre  ";
+							asignaturas a,registroasignaturadocentes rd,users u 
+							WHERE rd.id_Docente=u.id 
+							AND rd.id_Asignatura=a.id 
+							AND a.id_Paralelo=(SELECT id_Paralelo FROM `registroasignaturaestudiantes` WHERE id_Estudiante=?) 
+							ORDER BY a.nombre ";
 
         try {
             // Preparar sentencia
