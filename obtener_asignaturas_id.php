@@ -17,7 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     if ($perfil) {
 		$datos["estado"] = 1;
 		$datos["asignaturas"] = $perfil;
-		
+		$profesor = Meta::getProfesoresAsignaturasById($id);
+		$datos["profesores"] = $profesor;
 
         print json_encode($datos);
 
