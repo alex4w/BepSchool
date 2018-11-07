@@ -188,14 +188,91 @@ class Meta
 							n.nivel	
 							FROM 
 							asignaturas a,registroasignaturadocentes rd,users u ,paralelos p,
-							niveles n 
+							niveles n ,`registroasignatura` ra
 							WHERE rd.id_Docente=u.id 
-							AND rd.id_Asignatura=a.id 
-							AND a.id_Paralelo=(SELECT id_Paralelo FROM `registroasignaturaestudiantes` WHERE id_Estudiante=?) 
-							AND p.id=a.id_Paralelo
+							AND rd.id_registroAsignatura=a.id 
+							AND ra.id_Paralelo=(SELECT id_Paralelo FROM `registroasignaturaestudiantes` WHERE id_Estudiante=?) 
+							AND p.id=ra.id_Paralelo
+							AND a.id=ra.`id_Asignatura`
 							AND p.id_nivel=n.id
 							AND rd.`id_Periodo`=(SELECT id FROM `periodosacademicos` WHERE id_Estado=1)
 							ORDER BY a.nombre";
+
+        try {
+            // Preparar sentencia
+            $comando = Database::getInstance()->getDb()->prepare($consulta);
+            // Ejecutar sentencia preparada
+            $comando->execute(array($Id));
+            // Capturar primera fila del resultado
+            $row = $comando->fetchAll(PDO::FETCH_ASSOC);
+			
+            return $row;
+
+        } catch (PDOException $e) {
+            // Aquí puedes clasificar el error dependiendo de la excepción
+            // para presentarlo en la respuesta Json
+            return false;
+        }
+    }
+	
+	
+	public static function getNumeroAsistenciaById($Id)
+    {
+        // Consulta de la meta
+        $consulta = "SELECT COUNT(*) AS Num,
+								a.`id`,
+								a.`id_Estudiante`,
+								a.`id_Parcial`,
+								a.`dia`,
+								a.`fecha`,
+								a.`estado`,
+								a.`observacion`,
+								a.`id_registroAsignatura`,
+								q.`nombre` AS quimestre,
+								p.`nombre` AS parcial
+								FROM asistencias a,parciales p,quimestres q
+								WHERE a.`id_Estudiante`=?
+								AND a.`id_Parcial`=(SELECT id FROM `parciales` WHERE id_Estado=1)
+								AND p.`id`=a.`id_Parcial`
+								AND p.`id_Quimestre`=q.`id`
+								GROUP BY a.`estado`";
+
+        try {
+            // Preparar sentencia
+            $comando = Database::getInstance()->getDb()->prepare($consulta);
+            // Ejecutar sentencia preparada
+            $comando->execute(array($Id));
+            // Capturar primera fila del resultado
+            $row = $comando->fetchAll(PDO::FETCH_ASSOC);
+			
+            return $row;
+
+        } catch (PDOException $e) {
+            // Aquí puedes clasificar el error dependiendo de la excepción
+            // para presentarlo en la respuesta Json
+            return false;
+        }
+    }
+	
+	public static function getAsistenciaById($Id)
+    {
+        // Consulta de la meta
+        $consulta = "SELECT a.`id`,
+							a.`id_Estudiante`,
+							a.`id_Parcial`,
+							a.`dia`,
+							a.`fecha`,
+							a.`estado`,
+							a.`observacion`,
+							a.`id_registroAsignatura`,
+							q.`nombre` AS quimestre,
+							p.`nombre` AS parcial
+							FROM asistencias a,parciales p,quimestres q
+							WHERE a.`id_Estudiante`=?
+							AND a.`id_Parcial`=(SELECT id FROM `parciales` WHERE id_Estado=1)
+							AND p.`id`=a.`id_Parcial`
+							AND p.`id_Quimestre`=q.`id`
+							ORDER BY a.`fecha`";
 
         try {
             // Preparar sentencia
