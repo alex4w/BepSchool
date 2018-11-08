@@ -376,6 +376,44 @@ class Meta
         }
     }
 	
+	public static function getNumeroAsistenciaTotalById($Id)
+    {
+        // Consulta de la meta
+        $consulta = "SELECT COUNT(*) AS Num,
+							a.`id`,
+							a.`id_Estudiante`,
+							a.`id_Parcial`,
+							a.`estado`,
+							m.`nombre` AS asignatura,
+							q.`nombre` AS quimestre,
+							p.`nombre` AS parcial
+							FROM asistencias a,parciales p,quimestres q,`registroasignatura` ra,`asignaturas` m
+							WHERE a.`id_Estudiante`=2
+							AND p.`id`=a.`id_Parcial`
+							AND p.`id_Quimestre`=(SELECT id FROM `quimestres` WHERE id_Estado=1)
+							AND p.`id_Quimestre`=q.`id`
+							AND a.`id_registroAsignatura`=ra.`id`
+							AND ra.`id_Asignatura`=m.`id`
+							GROUP BY a.`estado`,m.`nombre`
+							ORDER BY m.`nombre`";
+
+        try {
+            // Preparar sentencia
+            $comando = Database::getInstance()->getDb()->prepare($consulta);
+            // Ejecutar sentencia preparada
+            $comando->execute(array($Id));
+            // Capturar primera fila del resultado
+            $row = $comando->fetchAll(PDO::FETCH_ASSOC);
+			
+            return $row;
+
+        } catch (PDOException $e) {
+            // Aquí puedes clasificar el error dependiendo de la excepción
+            // para presentarlo en la respuesta Json
+            return false;
+        }
+    }
+	
 	public static function getFotoById($Id)
     {
         // Consulta de la meta
