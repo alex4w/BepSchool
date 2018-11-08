@@ -61,7 +61,7 @@ class Meta
 					u.ruta_imagen, 
 					e.nombre AS unidadEducativa,
 					ru.role_id,
-					r.`nombre` AS rol	 
+					r.`name` AS rol	 
 					FROM 
 					users u,unidadeseducativas e,`role_user` ru,`roles` r 
 					WHERE u.id_UnidadEducativa=e.id 
@@ -106,7 +106,7 @@ class Meta
 					u.ruta_imagen, 
 					e.nombre AS unidadEducativa,
 					ru.role_id,
-					r.`nombre` AS rol				
+					r.`name` AS rol				
 					FROM 
 					users u,unidadeseducativas e,`role_user` ru,`roles` r 
 					WHERE u.id_UnidadEducativa=e.id 
