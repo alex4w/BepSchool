@@ -60,15 +60,15 @@ class Meta
 					u.imagen, 
 					u.ruta_imagen, 
 					e.nombre AS unidadEducativa,
-					ru.id_Roles,
+					ru.role_id,
 					r.`nombre` AS rol	 
 					FROM 
-					users u,unidadeseducativas e,`rolusers` ru,`roles` r 
+					users u,unidadeseducativas e,`role_user` ru,`roles` r 
 					WHERE u.id_UnidadEducativa=e.id 
-					AND u.id=ru.`id_User` 
-					AND ru.`id_Roles`=r.`id` 
+					AND u.id=ru.`user_id` 
+					AND ru.`role_id`=r.`id` 
 					AND (u.email=? or u.username=?)
-					AND (ru.id_Roles=2 or ru.id_Roles=3)";
+					AND (ru.role_id=2 or ru.role_id=3)";
 
         try {
             // Preparar sentencia
@@ -105,15 +105,15 @@ class Meta
 					u.imagen, 
 					u.ruta_imagen, 
 					e.nombre AS unidadEducativa,
-					ru.id_Roles,
+					ru.role_id,
 					r.`nombre` AS rol				
 					FROM 
-					users u,unidadeseducativas e,`rolusers` ru,`roles` r 
+					users u,unidadeseducativas e,`role_user` ru,`roles` r 
 					WHERE u.id_UnidadEducativa=e.id 
-					AND u.id=ru.`id_User` 
-					AND ru.`id_Roles`=r.`id` 
+					AND u.id=ru.`user_id` 
+					AND ru.`role_id`=r.`id` 
 					AND u.id=? 
-					AND (ru.id_Roles=2 or ru.id_Roles=3)";
+					AND (ru.role_id=2 or ru.role_id=3)";
 
         try {
             // Preparar sentencia
@@ -215,33 +215,33 @@ class Meta
         }
     }
 	
-	
-	public static function getNumeroAsistenciaById($Id)
+	//solo quimestre activo
+	public static function getNumeroAsistenciaMateriaById($Id,$Id_Asignatura)
     {
         // Consulta de la meta
         $consulta = "SELECT COUNT(*) AS Num,
-								a.`id`,
-								a.`id_Estudiante`,
-								a.`id_Parcial`,
-								a.`dia`,
-								a.`fecha`,
-								a.`estado`,
-								a.`observacion`,
-								a.`id_registroAsignatura`,
-								q.`nombre` AS quimestre,
-								p.`nombre` AS parcial
-								FROM asistencias a,parciales p,quimestres q
-								WHERE a.`id_Estudiante`=?
-								AND a.`id_Parcial`=(SELECT id FROM `parciales` WHERE id_Estado=1)
-								AND p.`id`=a.`id_Parcial`
-								AND p.`id_Quimestre`=q.`id`
-								GROUP BY a.`estado`";
+							a.`id`,
+							a.`id_Estudiante`,
+							a.`id_Parcial`,
+							a.`estado`,
+							m.`nombre` AS asignatura,
+							q.`nombre` AS quimestre,
+							p.`nombre` AS parcial
+							FROM asistencias a,parciales p,quimestres q,`registroasignatura` ra,`asignaturas` m
+							WHERE a.`id_Estudiante`=?
+							AND p.`id`=a.`id_Parcial`
+							AND p.`id_Quimestre`=(SELECT id FROM `quimestres` WHERE id_Estado=1)
+							AND p.`id_Quimestre`=q.`id`
+							AND a.`id_registroAsignatura`=ra.`id`
+							AND ra.`id_Asignatura`=?
+							AND ra.`id_Asignatura`=m.`id`
+							GROUP BY a.`estado`";
 
         try {
             // Preparar sentencia
             $comando = Database::getInstance()->getDb()->prepare($consulta);
             // Ejecutar sentencia preparada
-            $comando->execute(array($Id));
+            $comando->execute(array($Id,$Id_Asignatura));
             // Capturar primera fila del resultado
             $row = $comando->fetchAll(PDO::FETCH_ASSOC);
 			
@@ -254,7 +254,9 @@ class Meta
         }
     }
 	
-	public static function getAsistenciaById($Id)
+	
+	//solo quimestre activo
+	public static function getAsistenciaMateriaById($Id,$Id_Asignatura)
     {
         // Consulta de la meta
         $consulta = "SELECT a.`id`,
@@ -263,22 +265,105 @@ class Meta
 							a.`dia`,
 							a.`fecha`,
 							a.`estado`,
+							m.`nombre` AS asignatura,
 							a.`observacion`,
-							a.`id_registroAsignatura`,
 							q.`nombre` AS quimestre,
 							p.`nombre` AS parcial
-							FROM asistencias a,parciales p,quimestres q
+							FROM asistencias a,parciales p,quimestres q,`registroasignatura` ra,`asignaturas` m
 							WHERE a.`id_Estudiante`=?
-							AND a.`id_Parcial`=(SELECT id FROM `parciales` WHERE id_Estado=1)
 							AND p.`id`=a.`id_Parcial`
+							AND p.`id_Quimestre`=(SELECT id FROM `quimestres` WHERE id_Estado=1)
 							AND p.`id_Quimestre`=q.`id`
-							ORDER BY a.`fecha`";
+							AND a.`id_registroAsignatura`=ra.`id`
+							AND ra.`id_Asignatura`=?
+							AND ra.`id_Asignatura`=m.`id`
+							ORDER BY a.`fecha` DESC";
 
         try {
             // Preparar sentencia
             $comando = Database::getInstance()->getDb()->prepare($consulta);
             // Ejecutar sentencia preparada
-            $comando->execute(array($Id));
+            $comando->execute(array($Id,$Id_Asignatura));
+            // Capturar primera fila del resultado
+            $row = $comando->fetchAll(PDO::FETCH_ASSOC);
+			
+            return $row;
+
+        } catch (PDOException $e) {
+            // Aquí puedes clasificar el error dependiendo de la excepción
+            // para presentarlo en la respuesta Json
+            return false;
+        }
+    }
+	
+	public static function getNumeroAsistenciaMateriaTotalById($Id,$Id_Asignatura)
+    {
+        // Consulta de la meta
+        $consulta = "SELECT COUNT(*) AS Num,
+							a.`id`,
+							a.`id_Estudiante`,
+							a.`id_Parcial`,
+							a.`estado`,
+							m.`nombre` AS asignatura,
+							q.`nombre` AS quimestre,
+							p.`nombre` AS parcial
+							FROM asistencias a,parciales p,quimestres q,`registroasignatura` ra,`asignaturas` m
+							WHERE a.`id_Estudiante`=?
+							AND p.`id`=a.`id_Parcial`
+							AND p.`id_Quimestre`=(SELECT id FROM `quimestres` WHERE id_Estado=1)
+							AND p.`id_Quimestre`=q.`id`
+							AND a.`id_registroAsignatura`=ra.`id`
+							AND ra.`id_Asignatura`=?
+							AND ra.`id_Asignatura`=m.`id`
+							GROUP BY a.`estado`";
+
+        try {
+            // Preparar sentencia
+            $comando = Database::getInstance()->getDb()->prepare($consulta);
+            // Ejecutar sentencia preparada
+            $comando->execute(array($Id,$Id_Asignatura));
+            // Capturar primera fila del resultado
+            $row = $comando->fetchAll(PDO::FETCH_ASSOC);
+			
+            return $row;
+
+        } catch (PDOException $e) {
+            // Aquí puedes clasificar el error dependiendo de la excepción
+            // para presentarlo en la respuesta Json
+            return false;
+        }
+    }
+	
+	
+	//solo quimestre activo
+	public static function getAsistenciaMateriaTotalById($Id,$Id_Asignatura)
+    {
+        // Consulta de la meta
+        $consulta = "SELECT a.`id`,
+							a.`id_Estudiante`,
+							a.`id_Parcial`,
+							a.`dia`,
+							a.`fecha`,
+							a.`estado`,
+							m.`nombre` AS asignatura,
+							a.`observacion`,
+							q.`nombre` AS quimestre,
+							p.`nombre` AS parcial
+							FROM asistencias a,parciales p,quimestres q,`registroasignatura` ra,`asignaturas` m
+							WHERE a.`id_Estudiante`=?
+							AND p.`id`=a.`id_Parcial`
+							AND p.`id_Quimestre`=(SELECT id FROM `quimestres` WHERE id_Estado=1)
+							AND p.`id_Quimestre`=q.`id`
+							AND a.`id_registroAsignatura`=ra.`id`
+							AND ra.`id_Asignatura`=?
+							AND ra.`id_Asignatura`=m.`id`
+							ORDER BY a.`fecha` DESC";
+
+        try {
+            // Preparar sentencia
+            $comando = Database::getInstance()->getDb()->prepare($consulta);
+            // Ejecutar sentencia preparada
+            $comando->execute(array($Id,$Id_Asignatura));
             // Capturar primera fila del resultado
             $row = $comando->fetchAll(PDO::FETCH_ASSOC);
 			
