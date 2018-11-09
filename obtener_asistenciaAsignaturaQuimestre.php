@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 	
     // Manejar petición GET
     //
-	$asistencia = Meta::getAsistenciaMateriaById($id,$Id_Asignatura);
+	$asistencia = Meta::getNumeroAsistenciaMateriaById($id,$Id_Asignatura);
 	
 
     if ($asistencia) {
@@ -21,8 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 		$datos["asistencia"] = $asistencia;
 		
 		
-		$conteo = Meta::getNumeroAsistenciaMateriaById($id,$Id_Asignatura);
-		$datos["conteo"] = $conteo;
+		//$conteo = Meta::getNumeroAsistenciaMateriaById($id,$Id_Asignatura);
+		//$datos["conteo"] = $conteo;
         print json_encode($datos);
 
 
