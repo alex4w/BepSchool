@@ -388,7 +388,7 @@ class Meta
 							q.`nombre` AS quimestre,
 							p.`nombre` AS parcial
 							FROM asistencias a,parciales p,quimestres q,`registroasignatura` ra,`asignaturas` m
-							WHERE a.`id_Estudiante`=2
+							WHERE a.`id_Estudiante`=?
 							AND p.`id`=a.`id_Parcial`
 							AND p.`id_Quimestre`=(SELECT id FROM `quimestres` WHERE id_Estado=1)
 							AND p.`id_Quimestre`=q.`id`
