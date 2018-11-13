@@ -151,7 +151,7 @@ class Meta
 					AND t.`id_Asignatura`=a.`id` 
 					AND t.`id_Estado`=1 
 					AND (t.fechaFinalizacion- NOW())>0 
-					ORDER BY t.fechaFinalizacion DESC ";
+					ORDER BY t.fechaFinalizacion ASC ";
 
         try {
             // Preparar sentencia
