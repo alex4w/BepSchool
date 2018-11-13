@@ -131,6 +131,47 @@ class Meta
         }
     }
 	
+	public static function getTareasById($Id)
+    {
+        // Consulta de la meta
+        $consulta = "SELECT
+					t.id, 
+					t.nombre,
+					t.fechaInicio,
+					t.fechaFinalizacion,
+					t.descripcion,
+					t.`id_TipoActividad`,
+					TIMESTAMPDIFF(DAY, NOW(), t.`fechaFinalizacion`) AS dias_restantes,
+					MOD(TIMESTAMPDIFF(HOUR, NOW(), t.`fechaFinalizacion`), 24) AS horas_restantes,
+					MOD(TIMESTAMPDIFF(MINUTE, NOW(), t.`fechaFinalizacion`), 60) AS minutos_restantes,
+					MOD(TIMESTAMPDIFF(SECOND, NOW(), t.`fechaFinalizacion`), 60) AS segundos_restantes 
+					FROM tareas t,`tipoactividades` ta,`asignaturas` a 
+					WHERE t.`id_Paralelo`=(SELECT id_Paralelo FROM registroasignaturaestudiantes WHERE id_Estudiante=? AND id_Periodo=(SELECT id FROM `periodosacademicos` WHERE id_Estado=1)) 
+					AND t.`id_TipoActividad`=ta.`id` 
+					AND t.`id_Asignatura`=a.`id` 
+					AND t.`id_Estado`=1 
+					AND (t.fechaFinalizacion- NOW())>0 
+					ORDER BY t.fechaFinalizacion DESC ";
+
+        try {
+            // Preparar sentencia
+            $comando = Database::getInstance()->getDb()->prepare($consulta);
+            // Ejecutar sentencia preparada
+            $comando->execute(array($Id));
+            // Capturar primera fila del resultado
+            $row = $comando->fetchAll(PDO::FETCH_ASSOC);
+			
+            return $row;
+
+        } catch (PDOException $e) {
+            // Aquí puedes clasificar el error dependiendo de la excepción
+            // para presentarlo en la respuesta Json
+            return false;
+        }
+    }
+	
+	
+	
 	public static function getAsignaturasById($Id)
     {
         // Consulta de la meta
@@ -191,7 +232,7 @@ class Meta
 							niveles n ,`registroasignatura` ra
 							WHERE rd.id_Docente=u.id 
 							AND rd.id_registroAsignatura=a.id 
-							AND ra.id_Paralelo=(SELECT id_Paralelo FROM `registroasignaturaestudiantes` WHERE id_Estudiante=?) 
+							AND ra.id_Paralelo=(SELECT id_Paralelo FROM `registroasignaturaestudiantes` WHERE id_Estudiante=? and id_Periodo=(SELECT id FROM `periodosacademicos` WHERE id_Estado=1)) 
 							AND p.id=ra.id_Paralelo
 							AND a.id=ra.`id_Asignatura`
 							AND p.id_nivel=n.id
