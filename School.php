@@ -135,23 +135,25 @@ class Meta
     {
         // Consulta de la meta
         $consulta = "SELECT
-					t.id, 
-					t.nombre,
-					t.fechaInicio,
-					t.fechaFinalizacion,
-					t.descripcion,
-					t.`id_TipoActividad`,
-					TIMESTAMPDIFF(DAY, NOW(), t.`fechaFinalizacion`) AS dias_restantes,
-					MOD(TIMESTAMPDIFF(HOUR, NOW(), t.`fechaFinalizacion`), 24) AS horas_restantes,
-					MOD(TIMESTAMPDIFF(MINUTE, NOW(), t.`fechaFinalizacion`), 60) AS minutos_restantes,
-					MOD(TIMESTAMPDIFF(SECOND, NOW(), t.`fechaFinalizacion`), 60) AS segundos_restantes 
-					FROM tareas t,`tipoactividades` ta,`asignaturas` a 
-					WHERE t.`id_Paralelo`=(SELECT id_Paralelo FROM registroasignaturaestudiantes WHERE id_Estudiante=? AND id_Periodo=(SELECT id FROM `periodosacademicos` WHERE id_Estado=1)) 
-					AND t.`id_TipoActividad`=ta.`id` 
-					AND t.`id_Asignatura`=a.`id` 
-					AND t.`id_Estado`=1 
-					AND (t.fechaFinalizacion- NOW())>0 
-					ORDER BY t.fechaFinalizacion ASC ";
+						t.id, 
+						t.nombre,
+						t.fechaInicio,
+						t.fechaFinalizacion,
+						t.descripcion,
+						t.`id_TipoActividad`,
+						ta.`nombre` AS tipo,
+						a.`nombre` AS asignatura,
+						TIMESTAMPDIFF(DAY, NOW(), t.`fechaFinalizacion`) AS dias_restantes,
+						MOD(TIMESTAMPDIFF(HOUR, NOW(), t.`fechaFinalizacion`), 24) AS horas_restantes,
+						MOD(TIMESTAMPDIFF(MINUTE, NOW(), t.`fechaFinalizacion`), 60) AS minutos_restantes,
+						MOD(TIMESTAMPDIFF(SECOND, NOW(), t.`fechaFinalizacion`), 60) AS segundos_restantes 
+						FROM tareas t,`tipoactividades` ta,`asignaturas` a 
+						WHERE t.`id_Paralelo`=(SELECT id_Paralelo FROM registroasignaturaestudiantes WHERE id_Estudiante=? AND id_Periodo=(SELECT id FROM `periodosacademicos` WHERE id_Estado=1)) 
+						AND t.`id_TipoActividad`=ta.`id` 
+						AND t.`id_Asignatura`=a.`id` 
+						AND t.`id_Estado`=1 
+						AND (t.fechaFinalizacion- NOW())>0 
+						ORDER BY t.fechaFinalizacion ASC ";
 
         try {
             // Preparar sentencia
