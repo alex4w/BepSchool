@@ -153,13 +153,53 @@ class Meta
 						AND t.`id_Asignatura`=a.`id` 
 						AND t.`id_Estado`=1 
 						AND (t.fechaFinalizacion- NOW())>0 
-						ORDER BY t.fechaFinalizacion ASC ";
+						ORDER BY t.fechaFinalizacion ASC, t.`nombre` DESC ";
 
         try {
             // Preparar sentencia
             $comando = Database::getInstance()->getDb()->prepare($consulta);
             // Ejecutar sentencia preparada
             $comando->execute(array($Id));
+            // Capturar primera fila del resultado
+            $row = $comando->fetchAll(PDO::FETCH_ASSOC);
+			
+            return $row;
+
+        } catch (PDOException $e) {
+            // Aquí puedes clasificar el error dependiendo de la excepción
+            // para presentarlo en la respuesta Json
+            return false;
+        }
+    }
+	
+	public static function getTutoriasAsignaturaById($Id,$Id_Docente)
+    {
+        // Consulta de la meta
+        $consulta = "SELECT 
+						t.id,
+						t.hora_inicio,
+						t.hora_finalizacion,
+						t.dia,
+						a.nombre AS asignatura,
+						u.name AS profesor,
+						u.celular,
+						u.email,
+						u.Url_Foto 
+							FROM tutorias t,registroasignaturadocentes rd, registroasignatura ra,asignaturas a,users u 
+							WHERE rd.id_Periodo=(SELECT id FROM periodosacademicos WHERE id_Estado=1) 
+							AND rd.id=t.id_RegAsignaturaDocente 
+							AND rd.id_registroAsignatura=ra.id 
+							AND ra.id_Asignatura=a.id 
+							AND rd.id_Docente=u.id 
+							AND t.id_Estado=1 
+							AND a.id=? AND rd.`id_Docente`=? 
+							ORDER BY a.`id` ASC,t.`numero_dias` ASC";
+
+        try {
+            // Preparar sentencia
+            $comando = Database::getInstance()->getDb()->prepare($consulta);
+            // Ejecutar sentencia preparada
+            $comando->execute(array($Id,$Id_Docente));
             // Capturar primera fila del resultado
             $row = $comando->fetchAll(PDO::FETCH_ASSOC);
 			
@@ -225,6 +265,7 @@ class Meta
         $consulta = "SELECT DISTINCT	a.id, 
 							a.nombre, 
 							u.name AS Profesor,
+							u.id AS id_Profesor,
 							u.username,
 							u.cedula ,
 							p.nombre AS paralelo,
