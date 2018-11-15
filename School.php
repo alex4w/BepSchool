@@ -262,25 +262,24 @@ class Meta
 	public static function getProfesoresAsignaturasById($Id)
     {
         // Consulta de la meta
-        $consulta = "SELECT DISTINCT	a.id, 
+        $consulta = "SELECT 	a.id, 
 							a.nombre, 
 							u.name AS Profesor,
 							u.id AS id_Profesor,
 							u.username,
-							u.cedula ,
+							u.cedula,
 							p.nombre AS paralelo,
-							n.nivel	
-							FROM 
-							asignaturas a,registroasignaturadocentes rd,users u ,paralelos p,
-							niveles n ,`registroasignatura` ra
-							WHERE rd.id_Docente=u.id 
-							AND rd.id_registroAsignatura=a.id 
-							AND ra.id_Paralelo=(SELECT id_Paralelo FROM `registroasignaturaestudiantes` WHERE id_Estudiante=? and id_Periodo=(SELECT id FROM `periodosacademicos` WHERE id_Estado=1)) 
-							AND p.id=ra.id_Paralelo
-							AND a.id=ra.`id_Asignatura`
-							AND p.id_nivel=n.id
-							AND rd.`id_Periodo`=(SELECT id FROM `periodosacademicos` WHERE id_Estado=1)
-							ORDER BY a.nombre";
+							n.nivel 	
+							FROM  
+							asignaturas a,registroasignaturadocentes rd,users u ,`registroasignatura` ra,paralelos p, niveles n 
+							WHERE ra.`id_Asignatura`=a.`id` 
+							and rd.`id_registroAsignatura`=ra.`id` 
+							and rd.`id_Docente`=u.`id` 
+							AND rd.`id_Periodo`=(SELECT id FROM `periodosacademicos` WHERE id_Estado=1) 
+							AND ra.id_Paralelo=(SELECT id_Paralelo FROM `registroasignaturaestudiantes` WHERE id_Estudiante=? AND id_Periodo=(SELECT id FROM `periodosacademicos` WHERE id_Estado=1))  
+							and p.`id`=ra.`id_Paralelo` 
+							and n.`id`=p.`id_Nivel` 
+							ORDER BY a.nombre ";
 
         try {
             // Preparar sentencia
