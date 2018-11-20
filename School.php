@@ -297,6 +297,43 @@ class Meta
             return false;
         }
     }
+	public static function getDisciplinasById($Id)
+    {
+        // Consulta de la meta
+        $consulta = "SELECT
+						 d.id,
+						 d.id_registroAsignatura,
+						 a.`nombre` AS asignatura,
+						 d.nota AS cuatitativa,
+						 IF(d.`nota` >=9, 'DA', IF(d.`nota` >=7, 'AA', IF(d.`nota` >4, 'PA', 'NA'))) AS cualitativa,
+						 q.`nombre` AS quimestre, 
+						 p.`nombre` AS parcial
+						 FROM disiplinas d,`registroasignatura` rg,`asignaturas` a,`parciales` p,`quimestres` q
+						 WHERE d.`id_Parcial`=(SELECT id FROM parciales WHERE id=1)
+						 AND p.`id`=d.id_Parcial
+						 AND p.`id_Quimestre`=q.`id`
+						 AND d.`id_registroAsignatura`=rg.`id`
+						 AND rg.`id_Paralelo`=(SELECT id_Paralelo FROM registroasignaturaestudiantes WHERE id_Estudiante=? AND id_Periodo=(SELECT id FROM `periodosacademicos` WHERE id_Estado=1))
+						 AND d.`id_Estudiante`=?
+						 AND rg.`id_Asignatura`=a.`id`";
+
+        try {
+            // Preparar sentencia
+            $comando = Database::getInstance()->getDb()->prepare($consulta);
+            // Ejecutar sentencia preparada
+            $comando->execute(array($Id,$Id));
+            // Capturar primera fila del resultado
+            $row = $comando->fetchAll(PDO::FETCH_ASSOC);
+			
+            return $row;
+
+        } catch (PDOException $e) {
+
+            // Aquí puedes clasificar el error dependiendo de la excepción
+            // para presentarlo en la respuesta Json
+            return false;
+        }
+    }
 	
 	//solo quimestre activo
 	public static function getNumeroAsistenciaMateriaById($Id,$Id_Asignatura)
